@@ -66,6 +66,7 @@ export function shapeJob(j, { withDescription = true } = {}) {
     salary_max: j.salary_max,
     experience_required:
       j.experience_required != null ? Number(j.experience_required) : null,
+    education_required: j.education_required ?? null,
     category: j.category,
     status: j.status,
     created_at: j.created_at,

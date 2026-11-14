@@ -42,6 +42,20 @@ const fields = {
     .transform((v) => Math.round(v * 10) / 10)
     .nullable()
     .optional(),
+  education_required: z
+    .enum([
+      'below_10th',
+      '10th',
+      '12th',
+      'iti',
+      'diploma',
+      'graduate',
+      'postgraduate',
+      'doctorate',
+      'other',
+    ])
+    .nullable()
+    .optional(),
   category: z.enum(JOB_CATEGORIES).nullable().optional(),
   status: z.enum(['open', 'closed']).optional(),
   skills: jobSkillsSchema.optional(),
@@ -106,7 +120,6 @@ router.post('/', async (req, res) => {
     if (unknown.length > 0) return unknownSkillsResponse(res, unknown);
   }
 
-  // The job and its skills are created together in one operation
   const job = await prisma.jobs.create({
     data: {
       ...data,
@@ -144,7 +157,6 @@ router.put('/:id', async (req, res) => {
 
   const { skills, ...data } = parsed.data;
 
-  // Check the salary range using the new values mixed with the stored ones
   const newMin = 'salary_min' in data ? data.salary_min : existing.salary_min;
   const newMax = 'salary_max' in data ? data.salary_max : existing.salary_max;
   const salaryProblem = checkSalary(newMin, newMax);
