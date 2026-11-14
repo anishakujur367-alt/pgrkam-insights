@@ -14,6 +14,7 @@ import jobsRouter from './routes/jobs.js';
 import savedJobsRouter from './routes/savedJobs.js';
 import applicationsRouter from './routes/applications.js';
 import recommendationsRouter from './routes/recommendations.js';
+import analyticsRouter from './routes/analytics.js';
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -46,6 +47,7 @@ app.use('/api/jobs', jobsRouter);
 app.use('/api/saved-jobs', savedJobsRouter);
 app.use('/api/applications', applicationsRouter);
 app.use('/api/recommendations', recommendationsRouter);
+app.use('/api/analytics', analyticsRouter);
 app.use('/api', catalogRouter);
 
 app.use((req, res) => {
