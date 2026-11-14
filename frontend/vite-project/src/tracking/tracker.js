@@ -142,7 +142,18 @@ function buildEvent(eventName, properties, session) {
 function send(payload) {
   try {
     const headers = { 'Content-Type': 'application/json' };
-    const token = read(TOKEN_KEY);
+    let token = read(TOKEN_KEY);
+
+    if (!token) {
+      try {
+        token =
+          sessionStorage.getItem("candidateToken") ||
+          sessionStorage.getItem("adminToken");
+      } catch {
+        // Storage blocked: send the event anonymously.
+      }
+    }
+
     if (token) headers.Authorization = `Bearer ${token}`;
 
     fetch(`${API_URL}/api/events`, {

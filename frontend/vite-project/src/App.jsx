@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { usePageView } from "./tracking";
+import { usePageView, track } from "./tracking";
 import AdminApp from "./App.admin-backup.jsx";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
@@ -109,6 +109,14 @@ function CandidateApp() {
       if (location) params.set("location", location);
       const result = await api(`/jobs?${params}`);
       setJobs(result.jobs || []);
+      if (jobSearch.trim() || category || location) {
+        track("job_search", {
+          has_query: Boolean(jobSearch.trim()),
+          category: category || null,
+          location: location || null,
+          sort,
+        });
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -155,6 +163,9 @@ function CandidateApp() {
       });
       if (result.user.role !== "candidate") throw new Error("Please use a candidate account.");
       sessionStorage.setItem("candidateToken", result.token);
+      track(authMode === "register" ? "register" : "login", {
+        method: "email",
+      });
       setToken(result.token);
       setUser(result.user);
       setPage("dashboard");
@@ -199,6 +210,10 @@ function CandidateApp() {
           job_id: jobId,
           ...(recommendationId ? { recommendation_id: recommendationId } : {}),
         }),
+      });
+      track("job_apply", {
+        job_id: jobId,
+        recommendation_id: recommendationId,
       });
       setNotice("Your application was submitted.");
       setSelectedJob(null);
@@ -384,6 +399,7 @@ function CandidateApp() {
                       try {
                         const result = await api(`/jobs/${job.id}`);
                         setSelectedJob(result.job);
+                        track("job_view", { job_id: job.id });
                       } catch (err) { setError(err.message); }
                     }}>View details</button>
                     <button className="candidate-primary" onClick={() => user ? applyJob(job.id) : (setAuthMode("login"), setPage("auth"))}>Apply now</button>
