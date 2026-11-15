@@ -603,3 +603,16 @@ export default function App() {
   if (window.location.pathname === "/admin") return <AdminApp />;
   return <CandidateApp />;
 }
+              <a
+                className="candidate-primary"
+                href="/unity-kiosk/index.html"
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "inline-block",
+                  textDecoration: "none",
+                  marginLeft: "12px",
+                }}
+              >
+                Open Unity Career Kiosk
+              </a>
