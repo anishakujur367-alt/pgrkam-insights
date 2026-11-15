@@ -594,7 +594,21 @@ function CandidateApp() {
         </div>
       )}
 
-      <footer className="candidate-footer">© 2026 PGRKAM · Punjab Employment Portal <a href="/admin">Admin portal</a></footer>
+      <div style={{ textAlign: "center", padding: "20px" }}>
+        <a
+          className="candidate-primary"
+          href="/unity-kiosk/index.html"
+          target="_blank"
+          rel="noreferrer"
+          style={{ display: "inline-block", textDecoration: "none" }}
+        >
+        Open Unity Career Kiosk
+        </a>
+      </div>
+
+      <footer className="candidate-footer">
+        © 2026 PGRKAM · Punjab Employment Portal <a href="/admin">Admin portal</a>
+      </footer>
     </div>
   );
 }
@@ -603,16 +617,3 @@ export default function App() {
   if (window.location.pathname === "/admin") return <AdminApp />;
   return <CandidateApp />;
 }
-              <a
-                className="candidate-primary"
-                href="/unity-kiosk/index.html"
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: "inline-block",
-                  textDecoration: "none",
-                  marginLeft: "12px",
-                }}
-              >
-                Open Unity Career Kiosk
-              </a>

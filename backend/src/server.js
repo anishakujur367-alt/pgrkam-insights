@@ -18,7 +18,12 @@ import analyticsRouter from './routes/analytics.js';
 
 const app = express();
 const port = process.env.PORT || 5001;
-const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://pgrkam-insight.vercel.app',
+  process.env.FRONTEND_ORIGIN,
+].filter(Boolean);
 
 // Stops a broken or malicious client from flooding the events table
 const eventsLimiter = rateLimit({
@@ -30,7 +35,14 @@ const eventsLimiter = rateLimit({
 });
 
 app.use(helmet());
-app.use(cors({ origin: frontendOrigin }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+}));
 app.use(express.json({ limit: '100kb' }));
 
 app.get('/api/health', (req, res) => {
