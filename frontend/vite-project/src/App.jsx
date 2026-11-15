@@ -488,7 +488,6 @@ function CandidateApp() {
                         <p className="candidate-job-meta">Matched: {(rec.matched_skills || []).join(", ") || "No matched skills listed"}</p>
                       </div>
                       <div className="candidate-card-actions">
-                        <button onClick={() => trackRecommendation(rec.id, "click")}>Track view</button>
                         <button className="candidate-primary" onClick={async () => { await trackRecommendation(rec.id, "click"); await applyJob(rec.job.id, rec.id); }}>Apply</button>
                       </div>
                     </article>
