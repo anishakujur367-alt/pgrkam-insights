@@ -1,7 +1,9 @@
+
 import { Router } from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
+import crypto from 'node:crypto';
 import prisma from '../db.js';
 import { signToken } from '../utils/jwt.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -9,12 +11,11 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 
 const BCRYPT_ROUNDS = 12;
-// Used when the email is unknown, so login takes the same time either way
 const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', BCRYPT_ROUNDS);
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 30, // max 30 register/login attempts per IP per window
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts. Please try again later.' },
@@ -26,7 +27,6 @@ const emailField = z.string().trim().toLowerCase().pipe(z.email().max(254));
 const registerSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: emailField,
-  // bcrypt only uses the first 72 bytes, so 72 is the sensible maximum
   password: z.string().min(8).max(72),
 });
 
@@ -45,7 +45,6 @@ function validationError(res, error) {
   });
 }
 
-// Only these fields are ever sent back. password_hash is never included.
 const USER_SELECT = {
   id: true,
   name: true,
@@ -64,14 +63,39 @@ router.post('/register', authLimiter, async (req, res) => {
 
   try {
     const user = await prisma.users.create({
-      data: { name, email, password_hash, role: 'candidate' }, // role is NOT taken from the request
+      data: { name, email, password_hash, role: 'candidate' },
       select: USER_SELECT,
     });
-    return res.status(201).json({ user, token: signToken(user) });
+
+    // Record registration for acquisition analytics.
+    try {
+      await prisma.user_events.create({
+        data: {
+          event_id: crypto.randomUUID(),
+          event_name: 'register',
+          user_id: user.id,
+          source: 'direct',
+          device: 'unknown',
+          session_id: `registration-${crypto.randomUUID()}`,
+          event_time: new Date(),
+          properties: {
+            registration_method: 'email',
+          },
+        },
+      });
+    } catch (eventError) {
+      console.error('Registration event tracking failed:', eventError);
+    }
+
+    return res.status(201).json({
+      user,
+      token: signToken(user),
+    });
   } catch (err) {
-    // P2002 = unique constraint failed (email already registered)
     if (err.code === 'P2002') {
-      return res.status(409).json({ error: 'An account with this email already exists' });
+      return res.status(409).json({
+        error: 'An account with this email already exists',
+      });
     }
     throw err;
   }
@@ -102,7 +126,10 @@ router.post('/login', authLimiter, async (req, res) => {
     created_at: found.created_at,
   };
 
-  return res.status(200).json({ user, token: signToken(user) });
+  return res.status(200).json({
+    user,
+    token: signToken(user),
+  });
 });
 
 // ---------- GET /api/auth/me ----------
