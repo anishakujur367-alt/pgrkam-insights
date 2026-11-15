@@ -94,8 +94,10 @@ function CandidateApp() {
   }, []);
 
   useEffect(() => {
-    if (page === "home") loadJobs();
-  }, [page, jobSearch, category, location, sort]);
+    if (page === "home" || (page === "dashboard" && tab === "Find Jobs")) {
+      loadJobs();
+    }
+  }, [page, tab, jobSearch, category, location, sort]);
 
   useEffect(() => {
     if (page === "dashboard" && token) loadTab();

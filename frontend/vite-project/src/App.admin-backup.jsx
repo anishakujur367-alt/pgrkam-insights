@@ -599,10 +599,17 @@ function JobsManager({ token }) {
                     <div className="admin-table-actions">
                       <button
                         className="admin-small-button"
-                        onClick={() => {
-                          setFormJob(job);
-                          setCreating(false);
+                        onClick={async () => {
+                          setError("");
                           setNotice("");
+
+                          try {
+                            const result = await api(`/admin/jobs/${job.id}`, { token });
+                            setFormJob(result.job);
+                            setCreating(false);
+                          } catch (err) {
+                            setError(err.message);
+                          }
                         }}
                       >
                         Edit
@@ -716,7 +723,7 @@ function ApplicationsManager({ token }) {
         <div className="empty-state">No applications found.</div>
       ) : (
         <div className="admin-table-wrap">
-          <table className="admin-table">
+          <table className="admin-table admin-applications-table">
             <thead>
               <tr>
                 <th>Candidate</th>
