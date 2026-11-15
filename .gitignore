@@ -5,3 +5,20 @@ dist/
 build/
 .DS_Store
 *.log
+
+# Unity generated files
+unity/**/Library/
+unity/**/Temp/
+unity/**/Obj/
+unity/**/Logs/
+unity/**/UserSettings/
+unity/**/Build/
+unity/**/Builds/
+unity/**/MemoryCaptures/
+unity/**/Recordings/
+
+# Unity generated IDE files
+*.csproj
+*.sln
+*.slnx
+.vscode/
