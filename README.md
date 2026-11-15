@@ -142,6 +142,12 @@ Prisma schema is in `backend/prisma/schema.prisma`; committed migrations are in 
 
 For a hosted deployment, use a managed PostgreSQL database and configure `DATABASE_URL` on the backend host. Run the migrations against that database before serving traffic, and set `FRONTEND_ORIGIN` to the deployed frontend's exact origin. The local `localhost` connection string only works on the developer's machine.
 
+### Normalization and ER model
+
+The operational data is split into related entities such as users, profiles, jobs, skills, applications, and recommendations to reduce duplicated data. Many-to-many relationships are represented by junction tables: `candidate_skills`, `job_skills`, and `saved_jobs`; unique constraints prevent duplicate links. Analytics data is kept in the separate `analytics` schema, with raw events, recommendation events, and summarized daily metrics.
+
+Key relationships: a user can have one candidate profile and many applications, saved jobs, and events; jobs can have many applications and skills; users and skills are linked through `candidate_skills`, while jobs and skills are linked through `job_skills`. Recommendations connect a user to a job, and recommendation events record interaction with a recommendation.
+
 ## Scripts
 
 Backend scripts (run from `backend/`):
