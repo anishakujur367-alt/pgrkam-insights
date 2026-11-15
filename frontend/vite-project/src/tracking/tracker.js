@@ -6,7 +6,7 @@
 //  - The login token is read from localStorage under the key "pgrkam_token".
 //    The portal's login code must save it there. The server uses it to attach user_id.
 
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5001').replace(/\/+$/, '');
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/+$/, '');
 
 const TOKEN_KEY = 'pgrkam_token';
 const ANON_KEY = 'pgrkam_anon_id';
@@ -156,7 +156,7 @@ function send(payload) {
 
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    fetch(`${API_URL}/api/events`, {
+    fetch(`${API_URL}/events`,{
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
