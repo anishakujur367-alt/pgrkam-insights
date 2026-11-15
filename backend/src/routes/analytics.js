@@ -44,12 +44,16 @@ function getDateFilters(query) {
       throw new Error('Invalid endDate. Use YYYY-MM-DD.');
     }
 
-    const date = new Date(`${endDate}T23:59:59.999Z`);
+    const date = new Date(`${endDate}T00:00:00.000Z`);
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== endDate
+    ) {
       throw new Error('Invalid endDate. Use YYYY-MM-DD.');
     }
 
+    date.setUTCHours(23, 59, 59, 999);
     filters.lte = date;
   }
 

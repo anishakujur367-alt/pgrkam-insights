@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { usePageView, track } from "./tracking";
 import AdminApp from "./App.admin-backup.jsx";
@@ -27,6 +27,7 @@ const money = (min, max) => {
 };
 
 function CandidateApp() {
+  const trackedRecommendationImpressions = useRef(new Set());
   const [token, setToken] = useState(() => sessionStorage.getItem("candidateToken"));
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(true);
@@ -102,6 +103,19 @@ function CandidateApp() {
   useEffect(() => {
     if (page === "dashboard" && token) loadTab();
   }, [page, tab, token]);
+
+  useEffect(() => {
+    if (page !== "dashboard" || tab !== "Recommended" || !token) {
+      return;
+    }
+
+    recommendations.forEach((rec) => {
+      if (!trackedRecommendationImpressions.current.has(rec.id)) {
+        trackedRecommendationImpressions.current.add(rec.id);
+        trackRecommendation(rec.id, "impression");
+      }
+    });
+}, [page, tab, token, recommendations]);
 
   async function loadJobs() {
     try {
