@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { usePageView, track } from "./tracking";
 import AdminApp from "./App.admin-backup.jsx";
@@ -56,6 +56,74 @@ function CandidateApp() {
 
   usePageView(page === "home" ? "job-portal" : "candidate-dashboard", { section: tab });
 
+  const loadJobs = useCallback(async () => {
+    try {
+      const params = new URLSearchParams({ limit: "20", sort });
+      if (jobSearch.trim()) params.set("search", jobSearch.trim());
+      if (category) params.set("category", category);
+      if (location) params.set("location", location);
+
+      const result = await api(`/jobs?${params}`);
+      setJobs(result.jobs || []);
+
+      if (jobSearch.trim() || category || location) {
+        track("job_search", {
+          has_query: Boolean(jobSearch.trim()),
+          category: category || null,
+          location: location || null,
+          sort,
+        });
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [jobSearch, category, location, sort]);
+
+
+  const loadTab = useCallback(async () => {
+    setError("");
+
+    try {
+      if (tab === "Find Jobs") {
+        await loadJobs();
+      } else if (tab === "Recommended") {
+        const result = await api("/recommendations/me", { token });
+        setRecommendations(result.recommendations || []);
+      } else if (tab === "Saved Jobs") {
+        const result = await api("/saved-jobs", { token });
+        setSavedJobs(result.saved_jobs || []);
+      } else if (tab === "My Applications") {
+        const result = await api("/applications?limit=50", { token });
+        setApplications(result.applications || []);
+      } else if (tab === "My Profile") {
+        const [profileData, optionData, skillData] = await Promise.all([
+          api("/profile", { token }),
+          api("/options"),
+          api("/skills"),
+        ]);
+
+        setProfile(profileData.profile || {});
+        setSkills(profileData.skills || []);
+        setOptions(optionData);
+        setAllSkills(skillData.skills || []);
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [tab, token, loadJobs]);
+
+  const trackRecommendation = useCallback(async (id, eventType) => {
+    try {
+      await api(`/recommendations/${id}/events`, {
+        token,
+        method: "POST",
+        body: JSON.stringify({ event_type: eventType }),
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [token]);
+
   useEffect(() => {
     let active = true;
     async function initialise() {
@@ -92,17 +160,17 @@ function CandidateApp() {
     }
     initialise();
     return () => { active = false; };
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (page === "home" || (page === "dashboard" && tab === "Find Jobs")) {
       loadJobs();
     }
-  }, [page, tab, jobSearch, category, location, sort]);
+  }, [page, tab, loadJobs]);
 
   useEffect(() => {
     if (page === "dashboard" && token) loadTab();
-  }, [page, tab, token]);
+  }, [page, tab, token, loadTab]);
 
   useEffect(() => {
     if (page !== "dashboard" || tab !== "Recommended" || !token) {
@@ -115,58 +183,7 @@ function CandidateApp() {
         trackRecommendation(rec.id, "impression");
       }
     });
-}, [page, tab, token, recommendations]);
-
-  async function loadJobs() {
-    try {
-      const params = new URLSearchParams({ limit: "20", sort });
-      if (jobSearch.trim()) params.set("search", jobSearch.trim());
-      if (category) params.set("category", category);
-      if (location) params.set("location", location);
-      const result = await api(`/jobs?${params}`);
-      setJobs(result.jobs || []);
-      if (jobSearch.trim() || category || location) {
-        track("job_search", {
-          has_query: Boolean(jobSearch.trim()),
-          category: category || null,
-          location: location || null,
-          sort,
-        });
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  async function loadTab() {
-    setError("");
-    try {
-      if (tab === "Find Jobs") {
-        await loadJobs();
-      } else if (tab === "Recommended") {
-        const result = await api("/recommendations/me", { token });
-        setRecommendations(result.recommendations || []);
-      } else if (tab === "Saved Jobs") {
-        const result = await api("/saved-jobs", { token });
-        setSavedJobs(result.saved_jobs || []);
-      } else if (tab === "My Applications") {
-        const result = await api("/applications?limit=50", { token });
-        setApplications(result.applications || []);
-      } else if (tab === "My Profile") {
-        const [profileData, optionData, skillData] = await Promise.all([
-          api("/profile", { token }),
-          api("/options"),
-          api("/skills"),
-        ]);
-        setProfile(profileData.profile || {});
-        setSkills(profileData.skills || []);
-        setOptions(optionData);
-        setAllSkills(skillData.skills || []);
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  }
+  }, [page, tab, token, recommendations, trackRecommendation]);
 
   async function handleAuth(e) {
     e.preventDefault();
@@ -242,16 +259,6 @@ function CandidateApp() {
       const result = await api("/recommendations/generate", { token, method: "POST" });
       setRecommendations(result.recommendations || []);
       setNotice(`${result.total || 0} recommendations generated.`);
-    } catch (err) { setError(err.message); }
-  }
-
-  async function trackRecommendation(id, eventType) {
-    try {
-      await api(`/recommendations/${id}/events`, {
-        token,
-        method: "POST",
-        body: JSON.stringify({ event_type: eventType }),
-      });
     } catch (err) { setError(err.message); }
   }
 

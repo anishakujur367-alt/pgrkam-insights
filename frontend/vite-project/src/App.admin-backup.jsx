@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { usePageView } from "./tracking";
 
@@ -451,24 +451,25 @@ function JobsManager({ token }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  async function loadJobs() {
-    setLoading(true);
-    setError("");
+  const loadJobs = useCallback(async () => {
+
     try {
       const params = new URLSearchParams({ status: statusFilter, limit: "50" });
       if (search.trim()) params.set("search", search.trim());
+
       const result = await api(`/admin/jobs?${params}`, { token });
       setJobs(result.jobs || []);
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+    setLoading(false);
     }
-  }
+  }, [statusFilter, search, token]);
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     loadJobs();
-  }, [statusFilter, search]);
+  }, [loadJobs]);
 
   async function saveJob(payload) {
     setSaving(true);
@@ -492,11 +493,9 @@ function JobsManager({ token }) {
       setFormJob(null);
       setCreating(false);
       await loadJobs();
-    } catch (err) {
-      throw err;
-    } finally {
-      setSaving(false);
-    }
+      } finally {
+        setSaving(false);
+      }
   }
 
   async function toggleJobStatus(job) {
@@ -646,12 +645,12 @@ function ApplicationsManager({ token }) {
   const [selected, setSelected] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
 
-  async function loadApplications() {
-    setLoading(true);
-    setError("");
+  const loadApplications = useCallback(async () => {
+
     try {
       const params = new URLSearchParams({ page: String(page), limit: "20" });
       if (statusFilter) params.set("status", statusFilter);
+
       const result = await api(`/admin/applications?${params}`, { token });
       setApplications(result.applications || []);
       setPagination(result.pagination || null);
@@ -660,11 +659,12 @@ function ApplicationsManager({ token }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [page, statusFilter, token]);
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
     loadApplications();
-  }, [statusFilter, page]);
+  }, [loadApplications]);
 
   async function updateStatus(application, status) {
     setError("");
@@ -886,7 +886,7 @@ function Dashboard({ user, onLogout }) {
     }
 
     fetchAnalytics();
-  }, [activeTab, filters, managementTab]);
+    }, [activeTab, filters, managementTab, token]);
 
   function updateFilter(key, value) {
     setFilters((previous) => ({ ...previous, [key]: value }));
