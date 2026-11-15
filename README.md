@@ -1,97 +1,376 @@
 # PGRKAM Insight
+### Employment Discovery & Analytics Platform
 
-PGRKAM Insight is an employment discovery and analytics web application inspired by the Punjab Government's PGRKAM platform. It helps candidates browse and apply for jobs, maintain a skills profile, save opportunities, and receive job recommendations. It also records product events so administrators can understand how people use the platform.
+PGRKAM Insight is a full-stack employment discovery and analytics platform inspired by the Punjab Government's PGRKAM platform.
 
-## Features
+It helps candidates discover jobs, maintain profiles, manage applications and receive personalized job recommendations. Administrators can manage job listings, monitor applications and analyse platform activity.
 
-- Candidate registration, login, profile and skill management
-- Job search and filtering, saved jobs, and applications
-- Job recommendations based on candidate and job skills
-- Admin workflows for jobs and applications
-- Browser event tracking, including session, source, campaign, and device information
-- Analytics API and analytics data stored separately from operational data
+## 1. Features
 
-## Technology stack
+### Candidate
+- Registration and login.
+- Profile and skill management.
+- Job search, filtering and sorting.
+- Personalized job recommendations.
+- Save and manage jobs.
+- Apply for jobs.
+- Track application statuses.
+
+### Admin
+- Secure administrator login.
+- Create, edit and manage job listings.
+- Manage required job skills.
+- View and filter applications.
+- Update application statuses.
+- Monitor platform analytics and KPIs.
+
+### Analytics
+- Browser event tracking.
+- Session, source, campaign and device tracking.
+- Daily active users.
+- Registration and application analytics.
+- Recommendation impressions and clicks.
+- ETL processing and daily metrics.
+
+## 2. Technology Stack
 
 | Area | Technology |
-| --- | --- |
+|---|---|
 | Frontend | React 19, JavaScript, Vite 8, CSS |
-| Backend | Node.js (ES modules), Express 5 |
+| Backend | Node.js, Express 5 |
 | Database | PostgreSQL |
-| ORM and migrations | Prisma 7 with the PostgreSQL adapter |
-| Authentication | JWT and bcryptjs |
-| Request validation and security | Zod, Helmet, CORS, express-rate-limit |
+| ORM | Prisma 7, PrismaPg |
+| Authentication | JWT, bcryptjs |
+| Validation | Zod |
+| Security | Helmet, CORS, express-rate-limit |
+| Hosting | Vercel, Render, Neon |
 
-## Repository layout
+## 3. Website Usage
+
+### Candidate Guide
+
+1. Open the website.
+2. Register using your name, email and password.
+3. Log in to access the Candidate Workspace.
+4. Complete your profile with education, experience, location and skills.
+5. Browse jobs using search and filters.
+6. Open Recommended to view personalized job matches.
+7. Save interesting opportunities.
+8. Apply for suitable jobs.
+9. Open My Applications to track application progress.
+10. Log out when finished.
+
+### Admin Guide
+
+1. Open the website and select the Admin portal.
+2. Log in using an authorized administrator account.
+3. Access the Admin Dashboard.
+4. Open Job Management to create, edit or close job listings.
+5. Add job requirements, salary, location, education and required skills.
+6. Open Application Management to review candidate applications.
+7. Update application statuses.
+8. Open Analytics to monitor registrations, engagement, applications and recommendation performance.
+
+**Note:** Candidate accounts cannot access administrator-only APIs. Admin accounts must be created or promoted through the backend.
+
+## 4. Recommendation System
+
+The platform uses a weighted, rule-based recommendation algorithm to compare candidate profiles with open job listings.
+
+| Matching factor | Weight |
+|---|---:|
+| Skills | 50% |
+| Location | 15% |
+| Experience | 15% |
+| Job category | 10% |
+| Education | 10% |
+| **Total** | **100%** |
+
+### How It Works
+
+- Skills are matched using job skill requirements and importance values.
+- Location is compared against the candidate's preferred location.
+- Experience is evaluated against the job's required experience.
+- Category is matched against the candidate's preference.
+- Education is evaluated using an education-level ranking.
+
+The final weighted score is calculated as:
 
 ```text
-backend/
-  prisma/                 Prisma schema and committed database migrations
-  prisma7.config.ts       Prisma CLI configuration
-  scripts/                Admin, seed, and ETL scripts
-  src/routes/             Auth, jobs, applications, profiles, analytics, and event APIs
-  src/server.js           Express API entry point
-frontend/vite-project/
-  src/                     React application and browser event tracking
- database/                 SQL schema/reference files
- docs/                     Project documentation
+Final Score =
+(Skills × 50 + Location × 15
++ Experience × 15 + Category × 10
++ Education × 10) / 100
 ```
 
-## Prerequisites
+The system returns a match percentage, matched skills and missing skills.
 
-- Node.js and npm
-- PostgreSQL running locally for development
-- A PostgreSQL database and reachable connection string for any hosted deployment
+Recommendations are sorted from highest to lowest match score.
 
-## Local development setup
+This is a rule-based recommendation system, not a trained machine learning model.
 
-Each developer should use their own local PostgreSQL database and credentials. From the repository root, create the database using your local PostgreSQL username:
+## 5. Web Development Architecture
+
+### Frontend
+Built using React and JavaScript.
+
+Important concepts:
+- Components and reusable UI.
+- Props and state management.
+- React hooks such as useState and useEffect.
+- Conditional rendering.
+- API integration using HTTP requests.
+- Vite development and production builds.
+
+### Backend
+Built using Node.js and Express.
+
+Responsibilities:
+- REST API development.
+- Authentication and authorization.
+- Request validation.
+- Database operations.
+- Recommendation calculations.
+- Job and application management.
+- Event tracking and analytics.
+
+### Application Flow
+
+```text
+React Frontend
+      |
+      v
+Express REST API
+      |
+      v
+Authentication and Validation
+      |
+      v
+Business Logic
+      |
+      v
+Prisma ORM
+      |
+      v
+PostgreSQL Database
+      |
+      v
+JSON Response
+```
+
+## 6. Database Design
+
+PostgreSQL stores operational and analytical data in separate schemas.
+
+### Public Schema
+
+| Table | Purpose |
+|---|---|
+| users | User accounts and roles |
+| candidate_profiles | Candidate information |
+| skills | Skills catalog |
+| candidate_skills | Candidate-skill relationships |
+| jobs | Employment listings |
+| job_skills | Job-skill relationships |
+| saved_jobs | Saved opportunities |
+| applications | Job applications |
+| recommendations | Recommendation records |
+
+### Analytics Schema
+
+| Table | Purpose |
+|---|---|
+| user_events | Raw user activity |
+| acquisition_sources | Acquisition information |
+| recommendation_events | Recommendation interactions |
+| daily_metrics | Aggregated daily metrics |
+| rejected_events | Rejected events |
+| etl_runs | ETL execution history |
+
+### Database Relationships
+
+- One user can have one candidate profile.
+- One user can submit multiple applications.
+- One job can receive multiple applications.
+- Candidates and skills have a many-to-many relationship.
+- Jobs and skills have a many-to-many relationship.
+- Users can receive multiple recommendations.
+
+Junction tables such as candidate_skills and job_skills manage many-to-many relationships.
+
+## 7. SQL Concepts Used
+
+The project uses relational database concepts including:
+
+- DDL: CREATE, ALTER and DROP.
+- DML: INSERT, UPDATE and DELETE.
+- SELECT and WHERE filtering.
+- INNER JOIN and LEFT JOIN.
+- GROUP BY and HAVING.
+- Aggregate functions such as COUNT, SUM and AVG.
+- Subqueries and CASE statements.
+- Primary keys and foreign keys.
+- Unique constraints and indexes.
+- Database normalization.
+- Transactions and ACID properties.
+
+Prisma manages database access, while PostgreSQL executes the underlying SQL operations.
+
+## 8. Data Analytics and ETL
+
+The platform collects events such as:
+
+- Session starts.
+- Page views.
+- Registrations and logins.
+- Job searches and views.
+- Job saves and applications.
+- Recommendation impressions and clicks.
+
+Events can contain user identifiers, anonymous identifiers, session information, timestamps, source, campaign and device information.
+
+### ETL Process
+
+The ETL script is located at:
+
+`backend/scripts/run-etl.js`
+
+ETL stands for Extract, Transform and Load.
+
+1. **Extract:** Retrieve raw event and application data.
+2. **Transform:** Calculate daily activity, registrations, application metrics and recommendation performance.
+3. **Load:** Store aggregated results in the analytics.daily_metrics table.
+
+ETL execution details are recorded in analytics.etl_runs.
+
+## 9. Python and Data Science
+
+The current application does not contain Python source files. Its backend, recommendation algorithm and ETL pipeline use JavaScript, Prisma and SQL.
+
+Python could be used in future extensions for:
+
+- Data analysis using Pandas and NumPy.
+- Visualization using Matplotlib and Seaborn.
+- Machine learning using Scikit-learn.
+- Employment trend analysis.
+- Skill-demand forecasting.
+- Advanced recommendation models.
+
+These are potential extensions, not currently deployed features.
+
+## 10. Project Structure
+
+```text
+pgrkam-insight/
+│
+├── backend/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   └── schema.prisma
+│   ├── scripts/
+│   │   ├── create-admin.js
+│   │   ├── seed-demo.js
+│   │   ├── seed-skills.js
+│   │   └── run-etl.js
+│   ├── src/
+│   │   ├── routes/
+│   │   ├── middleware/
+│   │   ├── utils/
+│   │   ├── db.js
+│   │   └── server.js
+│   ├── prisma7.config.ts
+│   └── package.json
+│
+├── frontend/
+│   └── vite-project/
+│       ├── src/
+│       └── package.json
+│
+├── database/
+│   └── schema.sql
+│
+├── docs/
+└── README.md
+```
+
+## 11. Local Installation
+
+### Prerequisites
+- Node.js and npm.
+- PostgreSQL.
+- Git.
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/konsiddharth-7/pgrkam-insight.git
+cd pgrkam-insight
+```
+
+### Step 2: Create the database
 
 ```bash
 createdb pgrkam_insight
-psql pgrkam_insight -c "SELECT current_user;"
 ```
 
-Create `backend/.env` (do not commit it):
+### Step 3: Configure backend/.env
 
 ```dotenv
 PORT=5001
 DATABASE_URL=postgresql://YOUR_LOCAL_POSTGRES_USERNAME@localhost:5432/pgrkam_insight
 FRONTEND_ORIGIN=http://localhost:5173
-JWT_SECRET=replace-with-a-long-random-local-secret
+JWT_SECRET=your_private_random_secret
 ```
 
-Install backend dependencies, generate the Prisma client, and apply the committed migrations:
+### Step 4: Install backend dependencies
 
 ```bash
 cd backend
 npm install
+```
+
+### Step 5: Generate Prisma Client and apply migrations
+
+```bash
 npx prisma generate --config prisma7.config.ts
 npx prisma migrate deploy --config prisma7.config.ts
 ```
 
-Load the skills catalog (needed for skill-based profile and recommendation flows):
+### Step 6: Load the skills catalog
 
 ```bash
 npm run seed-skills
 ```
 
-Optionally create an administrator account in this local database:
+### Step 7: Create an administrator account
 
 ```bash
 npm run create-admin -- admin@example.com ChangeThisPassword123 "Site Admin"
 ```
 
-In one terminal, start the API:
+### Step 8: Start the backend
 
 ```bash
-cd backend
 npm run dev
 ```
 
-The API listens on port `5001`. Its health endpoint is `http://localhost:5001/api/health`.
+API address:
 
-In a second terminal, start the frontend:
+`http://localhost:5001`
+
+Health check:
+
+`http://localhost:5001/api/health`
+
+### Step 9: Configure the frontend
+
+Create `frontend/vite-project/.env`:
+
+```dotenv
+VITE_API_URL=http://localhost:5001/api
+```
+
+Install and start:
 
 ```bash
 cd frontend/vite-project
@@ -99,71 +378,91 @@ npm install
 npm run dev
 ```
 
-Vite normally serves the app at `http://localhost:5173`.
+Open:
 
-## Environment variables
+`http://localhost:5173`
 
-### Backend (`backend/.env`)
+## 12. Important Scripts
 
-| Variable | Purpose |
-| --- | --- |
-| `PORT` | API port; defaults to `5001` locally. |
-| `DATABASE_URL` | PostgreSQL connection string used by Prisma and the API. |
-| `FRONTEND_ORIGIN` | Exact browser origin allowed by the API's CORS configuration. |
-| `JWT_SECRET` | Secret used to sign and verify authentication tokens. Set a strong private value. |
+Run backend scripts from the backend directory.
 
-### Frontend (`frontend/vite-project/.env`)
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm start` | Start production server |
+| `npm run seed-skills` | Load skills catalog |
+| `npm run create-admin` | Create or promote an admin |
+| `npm run seed-demo` | Generate synthetic demo data |
+| `npm run etl` | Run analytics ETL |
+| `npx prisma migrate deploy --config prisma7.config.ts` | Apply migrations |
+| `npx prisma migrate status --config prisma7.config.ts` | Check migration status |
 
-| Variable | Purpose |
-| --- | --- |
-| `VITE_API_URL` | API base URL compiled into the Vite frontend. |
+The demo seed creates synthetic candidate accounts, jobs, applications, recommendations and events. Use it only in an appropriate test or demonstration database.
 
-Vite exposes variables prefixed with `VITE_` in browser code. Never place database credentials or other private secrets in frontend variables.
+## 13. Deployment
 
-> **API URL note:** The main app and event tracker currently compose the API URL differently. Before setting a production `VITE_API_URL`, make their path convention consistent: the app's API helper expects a base ending in `/api`, while the tracker appends `/api/events` to the configured value.
+The application uses three deployment services.
 
-## API overview
+| Service | Responsibility |
+|---|---|
+| Vercel | React frontend |
+| Render | Node.js and Express backend |
+| Neon | Managed PostgreSQL database |
 
-All API routes use the `/api` prefix. The backend includes endpoints for:
+### Frontend
+- Root: `frontend/vite-project`
+- Build: `npm run build`
+- Output: `dist`
+- Environment variable: `VITE_API_URL`
 
-- `/api/health` — service health check
-- `/api/auth` — registration, login, and authenticated user details
-- `/api/jobs` and `/api/admin/jobs` — job browsing and administration
-- `/api/applications` and `/api/admin/applications` — candidate applications and administration
-- `/api/profile`, `/api/skills`, and `/api/options` — candidate profile and catalog data
-- `/api/saved-jobs` and `/api/recommendations` — saved jobs and personalized recommendations
-- `/api/events` and `/api/analytics` — event collection and analytics
+### Backend
+- Root: `backend/`
+- Build: `npm install && npx prisma generate --config prisma7.config.ts`
+- Start: `npm start`
 
-Authentication-protected routes require a bearer token. Admin routes require an administrator account.
+### Database
+Neon PostgreSQL stores operational and analytics data. Production migrations must be applied before serving traffic.
 
-## Database and migrations
+## 14. Security
 
-Prisma schema is in `backend/prisma/schema.prisma`; committed migrations are in `backend/prisma/migrations`. For a new database, apply the committed migrations with `prisma migrate deploy`. Do not use `migrate reset` on data you need to keep. Keep each developer's `.env` local and commit schema changes together with their generated migration.
+The application implements:
 
-For a hosted deployment, use a managed PostgreSQL database and configure `DATABASE_URL` on the backend host. Run the migrations against that database before serving traffic, and set `FRONTEND_ORIGIN` to the deployed frontend's exact origin. The local `localhost` connection string only works on the developer's machine.
+- bcryptjs password hashing.
+- JWT authentication.
+- Role-based authorization.
+- Zod request validation.
+- Helmet security headers.
+- CORS configuration.
+- Rate limiting.
+- Database constraints and transactions.
 
-### Normalization and ER model
+Never commit `.env` files or expose database credentials and JWT secrets in frontend code.
 
-The operational data is split into related entities such as users, profiles, jobs, skills, applications, and recommendations to reduce duplicated data. Many-to-many relationships are represented by junction tables: `candidate_skills`, `job_skills`, and `saved_jobs`; unique constraints prevent duplicate links. Analytics data is kept in the separate `analytics` schema, with raw events, recommendation events, and summarized daily metrics.
+## 15. Limitations and Future Improvements
 
-Key relationships: a user can have one candidate profile and many applications, saved jobs, and events; jobs can have many applications and skills; users and skills are linked through `candidate_skills`, while jobs and skills are linked through `job_skills`. Recommendations connect a user to a job, and recommendation events record interaction with a recommendation.
+Potential improvements include:
 
-## Scripts
+- Machine learning-based recommendations.
+- Python-based analytics and forecasting.
+- Resume parsing.
+- Employer accounts.
+- Email notifications.
+- Advanced analytics dashboards.
+- Expanded automated testing.
+- Improved recommendation evaluation.
 
-Backend scripts (run from `backend/`):
+The current backend npm test script is a placeholder; a full automated backend test suite is not yet configured.
 
-- `npm run dev` — start the API with Nodemon
-- `npm start` — start the API
-- `npm run seed-skills` — insert the skills catalog (safe to run again)
-- `npm run create-admin -- <email> <password> [name]` — create or promote an admin user
-- `npm run seed-demo` — load the demo data provided by the project
-- `npm run etl` — run the analytics ETL script
+## 16. Conclusion
 
-Frontend scripts (run from `frontend/vite-project/`):
+PGRKAM Insight demonstrates the integration of full-stack web development, REST APIs, authentication, relational database design, SQL, weighted recommendation algorithms and data analytics.
 
-- `npm run dev` — start Vite development server
-- `npm run build` — create the production build in `dist/`
-- `npm run preview` — preview the production build locally
-- `npm run lint` — run ESLint
+It provides a practical employment platform where candidates can discover opportunities and administrators can manage listings and understand platform performance.
 
-The backend's current `npm test` script is a placeholder; no automated backend test suite is configured by that script yet.
+---
+
+## Live Application
+
+**Visit PGRKAM Insight:**
+
+https://pgrkam-insight.vercel.app
