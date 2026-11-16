@@ -1,4 +1,31 @@
 # PGRKAM Insight
+
+## Live Application
+
+**Visit PGRKAM Insight:**
+
+https://pgrkam-insight.vercel.app
+
+---
+
+## Demo Login Credentials
+
+You can use the following demo accounts to explore the website and test its functionality.
+
+| Account | Email | Password |
+|---|---|---|
+| Admin | admin@example.com | `AdminPass123` |
+| Test Candidate | testcandidate111@gmail.com | `TestCandidate123` |
+| Sneaky | sneaky@example.com | `Password123` |
+
+### How to Test
+1. Open the deployed website.
+2. Navigate to the login page.
+3. Enter any of the demo account credentials above.
+4. Explore the available features and test the application workflows.
+
+**Note:** These credentials are provided strictly for demonstration and testing purposes. Please do not use them for personal accounts or sensitive information.
+
 ### Employment Discovery & Analytics Platform
 
 PGRKAM Insight is a full-stack employment discovery and analytics platform inspired by the Punjab Government's PGRKAM platform.
@@ -461,28 +488,3 @@ It provides a practical employment platform where candidates can discover opport
 
 ---
 
-## Live Application
-
-**Visit PGRKAM Insight:**
-
-https://pgrkam-insight.vercel.app
-
----
-
-## Demo Login Credentials
-
-You can use the following demo accounts to explore the website and test its functionality.
-
-| Account | Email | Password |
-|---|---|---|
-| Admin | admin@example.com | `AdminPass123` |
-| Test Candidate | testcandidate111@gmail.com | `TestCandidate123` |
-| Sneaky | sneaky@example.com | `Password123` |
-
-### How to Test
-1. Open the deployed website.
-2. Navigate to the login page.
-3. Enter any of the demo account credentials above.
-4. Explore the available features and test the application workflows.
-
-**Note:** These credentials are provided strictly for demonstration and testing purposes. Please do not use them for personal accounts or sensitive information.
