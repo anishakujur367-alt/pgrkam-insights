@@ -1,8 +1,10 @@
+
 import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+
 import eventsRouter from './routes/events.js';
 import authRouter from './routes/auth.js';
 import adminRouter from './routes/admin.js';
@@ -18,35 +20,44 @@ import analyticsRouter from './routes/analytics.js';
 
 const app = express();
 const port = process.env.PORT || 5001;
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5174',
   'https://pgrkam-insight.vercel.app',
   process.env.FRONTEND_ORIGIN,
 ].filter(Boolean);
 
-// Stops a broken or malicious client from flooding the events table
+// Limits requests to the events endpoint
 const eventsLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  limit: 300, // max 300 events per IP per minute
+  windowMs: 60 * 1000,
+  limit: 300,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many events. Please slow down.' },
 });
 
 app.use(helmet());
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
+
     return callback(new Error(`CORS blocked origin: ${origin}`));
   },
 }));
+
 app.use(express.json({ limit: '100kb' }));
 
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'pgrkam-insight-api' });
+  res.status(200).json({
+    status: 'ok',
+    service: 'pgrkam-insight-api',
+  });
 });
 
 app.use('/api/events', eventsLimiter, eventsRouter);
@@ -70,6 +81,7 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Invalid JSON body' });
   }
+
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 });
