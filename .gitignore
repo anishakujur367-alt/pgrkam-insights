@@ -23,3 +23,11 @@ unity/**/Recordings/
 *.sln
 *.slnx
 .vscode/
+
+# Include Unity WebGL build inside the frontend
+!frontend/
+!frontend/vite-project/
+!frontend/vite-project/public/
+!frontend/vite-project/public/unity-kiosk/
+!frontend/vite-project/public/unity-kiosk/Build/
+!frontend/vite-project/public/unity-kiosk/Build/**
